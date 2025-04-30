@@ -1,3 +1,54 @@
 services:
   scraper:
     build: ./scraper
+    environment:
+      #- MODO_ALERTAS=generar # comentar para usar los eventos ya scrapeados
+      - MODO_ALERTAS=usar_existentes
+    depends_on: 
+      - mongodb
+
+  mongodb:
+    image: mongo:4.4
+    restart: always
+    hostname: mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=sd_db
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data:/data/db
+    logging:
+      driver: "none"
+
+  redis:
+    image: "redis:latest"
+    hostname: rediss
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data:/data
+
+  cache: 
+    build: ./cache
+    hostname: cachechito
+    ports:
+      - 9090:9090
+    environment:
+      - EVICTION_POLICY=allkeys-random
+      #- EVICTION_POLICY=allkeys-lru
+    depends_on:
+      - redis
+      
+  traficador:
+    build: ./generador_trafico
+    environment:
+      #- MODO_DISTRIBUCION=normal
+      - MODO_DISTRIBUCION=aleatorio # TODO: crear otra instancia de traficador pero con la otra distribucion
+      - MULTIPLICADOR=1
+    depends_on:
+    - scraper
+    - mongodb
+    - cache
+    - redis
