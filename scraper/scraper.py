@@ -117,7 +117,7 @@ if __name__ == "__main__":
     print(f"Modo de operación: {modo}")
 
     if modo == "generar":
-        while total < 10 * 1000:
+        while total < 10 * 1000: # asegurar un minimo de 10k
             asyncio.run(main())
     else:
         insertar_archivos_json_a_db()
