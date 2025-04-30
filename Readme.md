@@ -3,7 +3,6 @@
 ## Requisitos
 - Docker
 
-
 ## Instrucciones de uso
 - Descargar o clonar el repositorio de git
 - Abrir una terminal dentro de la carpeta clonada
