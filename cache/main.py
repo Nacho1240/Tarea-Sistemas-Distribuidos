@@ -17,7 +17,7 @@ if eviction_policy not in valid_policies:
     raise ValueError(f"Política de remoción no válida: {eviction_policy}. Usa 'allkeys-lru' o 'allkeys-random'.")
 
 r = redis.Redis(host='redis', port=6379, db=0)
-r.config_set('maxmemory', '4mb')
+r.config_set('maxmemory', '2mb')
 r.config_set('maxmemory-policy', eviction_policy)
 
 class ListenServer(BaseHTTPRequestHandler):

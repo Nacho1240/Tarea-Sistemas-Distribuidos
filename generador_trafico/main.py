@@ -2,7 +2,7 @@ import os
 import requests
 import time
 from pymongo import MongoClient
-from random import shuffle, gauss
+from random import gauss, choice
 
 mongoClient = MongoClient(
     host="mongodb",
@@ -18,23 +18,31 @@ def get_events_db():
     events_collection = db.waze_events
     return list(events_collection.find({}))
 
-def get_events_random():
+def get_events_random(m=10000):
     events = get_events_db()
-    shuffle(events)
-    return events
+    result = list(events)
 
-def get_events_normal():
+    while len(result) < m:
+        result.append(choice(events))
+
+    return result
+
+# nota: este "m" es el largo final de la lista con los eventos duplicados NO la cantidad de eventos individuales
+def get_events_normal(m=10000): 
     events = get_events_db()
     n = len(events)
-    # ajusta media y desviación estándar a tu gusto:
     mean = n / 2
-    stddev = n / 6   # aprox. el 99.7% estará en [0, n]
-    # generamos un "peso" gaussiano para cada evento
-    weighted = [(gauss(mean, stddev), e) for e in events]
-    # ordenamos por ese peso
-    weighted.sort(key=lambda x: x[0])
+    stddev = n / 6
 
-    return [e for _, e in weighted]
+    weighted_events = []
+
+    while len(weighted_events) < m:
+        # Genera un índice con distribución normal y lo redondea al más cercano válido
+        idx = int(gauss(mean, stddev))
+        idx = max(0, min(n - 1, idx))  # Evita salir del rango
+        weighted_events.append(events[idx])
+
+    return weighted_events
 
 def make_requests_events(events):
     for event in events:
