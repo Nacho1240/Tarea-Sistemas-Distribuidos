@@ -1,5 +1,3 @@
-# generador de trafico -> cache -> (verificar si esta en cache; sino retornar desde la db y guardar en cache segun corresponda)
-
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import redis
 import json

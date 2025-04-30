@@ -57,6 +57,9 @@ def main():
     print(f"GENERADOR DE TRÁFICO - DISTRIBUCIÓN: {modo}")
     mul = int(os.getenv("MULTIPLICADOR", "1"))
 
+    if len(get_events_db()) == 0:
+        return
+
     for i in range(mul, 0, -1):
         if modo == "normal":
             eventos = get_events_normal()

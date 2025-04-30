@@ -45,7 +45,7 @@ services:
     build: ./generador_trafico
     environment:
       #- MODO_DISTRIBUCION=normal
-      - MODO_DISTRIBUCION=aleatorio # TODO: crear otra instancia de traficador pero con la otra distribucion
+      - MODO_DISTRIBUCION=aleatorio
       - MULTIPLICADOR=1
     depends_on:
     - scraper
