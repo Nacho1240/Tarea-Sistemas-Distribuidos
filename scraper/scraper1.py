@@ -8,6 +8,7 @@ import datetime
 import os
 from pymongo import MongoClient
 
+
 def insertar_archivos_json_a_db():
     json_files = glob.glob("alertas*.json")  # busca archivos tipo 'alertas.json', 'alertas_*.json', etc.
 
@@ -41,17 +42,19 @@ def insertar_archivos_json_a_db():
         except Exception as e:
             print(f"Error procesando {file}: {e}")
 
-    print(f"\nTotal de alertas insertadas: {total_insertados}")
-    print(f"Total de eventos en la db: {events_collection.count_documents({})}")
+    print(f"\n Total de alertas insertadas: {total_insertados}")
+    print(f"total de eventos en la db: {events_collection.count_documents({})}")
 
 async def fetch(client, url):
     response = await client.get(url)
-    time.sleep(2)  # estaba en 2000 segundos, lo cambié a 2
+    time.sleep(2000)
     while response.status_code == 429:
         print("ME BANEARON!! AAAAAA\nesperando 20 segundos")
         time.sleep(20)   
         response = await client.get(url)
     return response.json()
+
+total = 0
 
 async def main():
     center_lat = -33.44637373669101
@@ -85,21 +88,21 @@ async def main():
         url = f"https://www.waze.com/live-map/api/georss?top={block['top']}&bottom={block['bottom']}&left={block['left']}&right={block['right']}&env=row&types=alerts,traffic"
         urls.append(url)
 
+
     alerts = []
-    total = 0
 
     async with httpx.AsyncClient(timeout=None) as client:
-        for idx, url in enumerate(urls, start=1):
-            try:
-                jsonResponse = await fetch(client, url)
-                new_alerts = jsonResponse.get("alerts", [])
-                alerts.extend(new_alerts)
-                total += len(new_alerts)
-                print(f"[{idx}/{len(urls)}] Alertas nuevas: {len(new_alerts)} | Total hasta ahora: {total}")
-            except Exception as e:
-                print(f"Error al procesar URL {idx}: {e}")
+        tasks = [fetch(client, url) for url in urls]
+        responses = await asyncio.gather(*tasks)
 
-    print(f"\nTotal de alertas obtenidas: {total}")
+        for jsonResponse in responses:
+            try:
+                alerts.extend(jsonResponse["alerts"])
+            except KeyError:
+                pass
+
+    total += len(alerts)
+    print(f"Total de alertas obtenidas: {total}")
 
     if alerts:
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -115,7 +118,7 @@ if __name__ == "__main__":
     print(f"Modo de operación: {modo}")
 
     if modo == "generar":
+        #while total < 10 * 1000: # asegurar un minimo de 10k
         asyncio.run(main())
     else:
         insertar_archivos_json_a_db()
-
