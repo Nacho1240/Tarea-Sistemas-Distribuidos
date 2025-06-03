@@ -2,7 +2,7 @@
 
 ## Requisitos
 - Docker
-- Minimo 2 neuronas
+
 
 ## Instrucciones de uso
 - Descargar o clonar el repositorio de git
